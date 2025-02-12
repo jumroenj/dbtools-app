@@ -1,0 +1,62 @@
+name: DEV - Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "Environment"
+        required: true
+        default: "main"
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  IMAGE_NAME: "dbtools-api-cloud"
+  IMAGE_TAG: "0.0.1"
+  # CD_REPOSITORY_NAME: "corp-ais/cdc05-pipeline"
+
+jobs:
+  env-setup:
+    runs-on: ubuntu-latest
+    outputs:
+      image_name: ${{ steps.set-env-vars.outputs.image_name }}
+      image_tag: ${{ steps.set-env-vars.outputs.image_tag }}
+    steps:
+      - id: set-env-vars
+        run: |
+          echo "image_name=$(echo ${{ env.IMAGE_NAME }})" >> $GITHUB_OUTPUT
+          echo "image_tag=$(echo ${{ env.IMAGE_TAG }})" >> $GITHUB_OUTPUT
+
+  call-ci-workflow:
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+      packages: write
+    uses: ./nodejs-ci.yml
+    needs: [env-setup]
+    with:
+      image_name: ${{ needs.env-setup.outputs.image_name }}
+      image_tag: ${{ needs.env-setup.outputs.image_tag }}
+    secrets: inherit
+
+  # dispatch-cd:
+  #   runs-on: ubuntu-latest
+  #   needs: [call-ci-workflow]
+  #   permissions:
+  #     actions: read
+  #     contents: write
+  #     security-events: write
+  #     packages: read
+  #   steps:
+  #     - name: Repository Dispatch
+  #       uses: peter-evans/repository-dispatch@v2
+  #       with:
+  #         token: ${{ secrets.GH_TOKEN }}
+  #         repository: ${{ env.CD_REPOSITORY_NAME }}
+  #         event-type: cd-dev
+  #         client-payload: '{"image_name": "${{ github.ref }}", "image_tag": "${{ github.sha }}"}'
