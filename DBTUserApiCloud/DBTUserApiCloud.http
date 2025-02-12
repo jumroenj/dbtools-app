@@ -1,0 +1,6 @@
+@DBTUserApiCloud_HostAddress = http://localhost:5113
+
+GET {{DBTUserApiCloud_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

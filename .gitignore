@@ -1,0 +1,8 @@
+*[Bb]in
+*[Dd]ebug*/
+*[Dd]ebug*/
+*obj/
+*/Logs*/
+*FileParamInput*/
+*/[Ww]eb.config
+*/appsetting.dev.json

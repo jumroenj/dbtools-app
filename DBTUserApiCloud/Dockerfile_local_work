@@ -1,0 +1,50 @@
+# Set the base image
+#FROM mcr.microsoft.com/dotnet/sdk:8.0.100-1-windowsservercore-ltsc2022 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
+
+# Set the working directory
+WORKDIR /app
+
+# Copy csproj and restore as distinct layers
+##COPY *.csproj ./
+##RUN dotnet restore
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+COPY ["DBT4UserApiCloud/DBT4UserApiCloud.csproj", "DBT4UserApiCloud/"]
+RUN dotnet restore "./DBT4UserApiCloud/./DBT4UserApiCloud.csproj"
+
+COPY . .
+WORKDIR "/src/DBT4UserApiCloud"
+RUN dotnet build "./DBT4UserApiCloud.csproj" -c %BUILD_CONFIGURATION% -o /app/build
+
+
+# Copy everything else and build the API
+##COPY . ./
+##RUN dotnet publish -c Release -o out
+
+# Build the runtime image
+#FROM mcr.microsoft.com/dotnet/sdk:8.0.100-1-windowsservercore-ltsc2022
+##FROM mcr.microsoft.com/dotnet/aspnet:8.0
+##WORKDIR /app
+##COPY --from=build-env /app/out .
+
+FROM build-env AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./DBT4UserApiCloud.csproj" -c %BUILD_CONFIGURATION% -o /app/publish /p:UseAppHost=false
+
+FROM  mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+
+EXPOSE 80
+
+ENTRYPOINT ["dotnet", "DBT4UserApiCloud.dll"]
+
+# Expose the API port
+##EXPOSE 80
+
+# Set the entry point for the API
+##ENTRYPOINT ["dotnet", "DBT4UserApiCloud.dll"]
