@@ -17,6 +17,7 @@ on:
 env:
   IMAGE_NAME: "dbtools-api-cloud"
   IMAGE_TAG: "0.0.1"
+  DOTNET_VERSION: "8.0.x"
   # CD_REPOSITORY_NAME: "corp-ais/cdc05-pipeline"
 
 jobs:
@@ -25,11 +26,13 @@ jobs:
     outputs:
       image_name: ${{ steps.set-env-vars.outputs.image_name }}
       image_tag: ${{ steps.set-env-vars.outputs.image_tag }}
+      dotnet_version: ${{ steps.set-env-vars.outputs.dotnet_version }}
     steps:
       - id: set-env-vars
         run: |
           echo "image_name=$(echo ${{ env.IMAGE_NAME }})" >> $GITHUB_OUTPUT
           echo "image_tag=$(echo ${{ env.IMAGE_TAG }})" >> $GITHUB_OUTPUT
+          echo "dotnet_version=$(echo ${{ env.DOTNET_VERSION }})" >> $GITHUB_OUTPUT
 
   call-ci-workflow:
     permissions:
@@ -42,6 +45,7 @@ jobs:
     with:
       image_name: ${{ needs.env-setup.outputs.image_name }}
       image_tag: ${{ needs.env-setup.outputs.image_tag }}
+      dotnet_version: ${{ needs.env-setup.outputs.dotnet_version }}
     secrets: inherit
 
   # dispatch-cd:
