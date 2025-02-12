@@ -37,7 +37,7 @@ jobs:
       contents: read
       security-events: write
       packages: write
-    uses: ./nodejs-ci.yml
+    uses: ./.github/workflows/nodejs-ci.yml
     needs: [env-setup]
     with:
       image_name: ${{ needs.env-setup.outputs.image_name }}
