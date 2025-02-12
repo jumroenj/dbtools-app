@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: dev
-    needs: [unitest]
+    needs: [unitest, analyze]
     permissions:
       contents: read
       actions: read
